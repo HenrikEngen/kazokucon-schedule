@@ -1,0 +1,23 @@
+body {
+  margin: 0;
+  font-family: 'Roboto', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background: linear-gradient(180deg,rgba(79, 45, 82, 1) 0%, rgba(0, 0, 0, 1) 100%) no-repeat;
+  color: white;
+  padding: 0;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+
+@font-face {
+  font-family: "ScheduleAppTitle";
+  src: url("/public/archivoblack-regular.ttf") format("truetype");
+}
+@font-face {
+  font-family: "ScheduleFont";
+  src: url("/public/roboto.ttf") format("truetype");
+}
