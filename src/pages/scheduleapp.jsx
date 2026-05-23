@@ -45,7 +45,6 @@ const S = {
     `,
     ScheduleDayContainer: styled.div`
         display: flex;
-        flex: 1;
         flex-flow: column;
         text-align: left;
         gap: .15rem;
@@ -76,15 +75,38 @@ const S = {
     InputLabel: styled.span``,
     ScheduleContainer: styled.div`
         display: flex;
-        flex-flow: column;
+        flex-flow: row;
         gap: 2rem;
         margin: 0 1rem;
+
+        @media screen and (max-width: 480px) {
+            flex-flow: column;
+        }
     `,
     RowContainer: styled.div`
         display: flex;
         flex-flow: row;
-        flex: 1;
         gap: 6em;
+    `,
+
+    ClockContainer: styled.div`
+        flex: 1;
+        margin: auto 1rem;
+
+        @media screen and (max-width: 480px) {
+            display: none;
+        }
+    `,
+    Clock: styled.div`
+        display: flex;
+        flex-flow: row;
+        font-family: monospace;
+        font-size: 2.75vw;
+        font-weight: 400;
+        letter-spacing: 0.1em;
+    `,
+    ClockColon: styled.span`
+        opacity: ${props => props.visible ? "1" : "0"};
     `,
 }
 
@@ -95,6 +117,11 @@ export const KazokuconInfo = () => {
     const [ completeSchedule, setCompleteSchedule ] = useState(null);
     const [ agendaError, setAgendaError ] = useState(false);
     const [ hideFinished, setHideFinished ] = useState(false);
+
+    // Clock
+    const [ hourClock, setHourClock ] = useState(undefined);
+    const [ minuteClock, setMinuteClock ] = useState(undefined);
+    const [ clockColonVisibility, setClockColonVisibility ] = useState(true);
 
     const Now = new Date().getTime();
 
@@ -128,6 +155,12 @@ export const KazokuconInfo = () => {
         const initialise = async () => {
             // Show loading container
             setLoading(true);
+
+            // Create clock
+            const dateTime = new Date();
+            setHourClock(String(dateTime.toLocaleTimeString('no', {hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Oslo'}).slice(0, 2)));
+            setMinuteClock(String(dateTime.toLocaleTimeString('no', {hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Oslo'}).slice(3)));
+            setClockColonVisibility(true);
 
             // Get storage
             const localStorageHideFinished = localStorage.getItem("hideFinished");
@@ -166,6 +199,13 @@ export const KazokuconInfo = () => {
                 setAgendaError(true);
             }
         }
+
+        const colonShift = () => {
+            const dateTime = new Date();
+            setHourClock(String(dateTime.toLocaleTimeString('no', {hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Oslo'}).slice(0, 2)));
+            setMinuteClock(String(dateTime.toLocaleTimeString('no', {hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Oslo'}).slice(3)));
+            setClockColonVisibility(clockColonVisibility => !clockColonVisibility);
+        }
         
         // Initialise the code
         initialise();
@@ -174,6 +214,15 @@ export const KazokuconInfo = () => {
         const interval = setInterval(() => {
             inner();
         }, 30000);
+
+        // Create intervals for colon shift
+        const halfSecondInterval = setInterval(() => {
+            colonShift();
+        }, 1000);
+
+        return () => {
+            clearInterval(halfSecondInterval, interval);
+        };
 
         return () => {
             clearInterval(interval);
@@ -191,12 +240,18 @@ export const KazokuconInfo = () => {
             <S.DefaultContainer loading={loading}>
                 <S.HeaderContainer>
                     <S.RowContainer>
+                        <S.ClockContainer>
+                            <S.Clock>
+                                {hourClock}<S.ClockColon visible={clockColonVisibility}>:</S.ClockColon>{minuteClock}
+                            </S.Clock>
+                        </S.ClockContainer>
                         <S.LogoContainer>
                             <S.Logo>
                                 <S.LogoElement src="logo_kazokucon8neonage.png" />
                                 <S.LogoUnderTitle>Program / Timeplan</S.LogoUnderTitle>
                             </S.Logo>
                         </S.LogoContainer>
+                        <S.ClockContainer />
                     </S.RowContainer>
                 </S.HeaderContainer>
 
